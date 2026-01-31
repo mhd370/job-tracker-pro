@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useMemo } from "react";
+import React, { createContext, useContext, useMemo, useCallback } from "react";
 import useLocalStorage from "../hooks/useLocalStorage";
 
 const JobsContext = createContext(null);
@@ -6,21 +6,32 @@ const JobsContext = createContext(null);
 export function JobsProvider({ children }) {
   const [jobs, setJobs] = useLocalStorage("jobs", []);
 
-  const addJob = (job) => {
-    setJobs((prev) => [job, ...prev]);
-  };
+  const addJob = useCallback(
+    (job) => {
+      setJobs((prev) => [job, ...prev]);
+    },
+    [setJobs]
+  );
 
-  const updateJob = (id, updates) => {
-    setJobs((prev) => prev.map((j) => (j.id === id ? { ...j, ...updates } : j)));
-  };
+  const updateJob = useCallback(
+    (id, updates) => {
+      setJobs((prev) =>
+        prev.map((j) => (j.id === id ? { ...j, ...updates } : j))
+      );
+    },
+    [setJobs]
+  );
 
-  const deleteJob = (id) => {
-    setJobs((prev) => prev.filter((j) => j.id !== id));
-  };
+  const deleteJob = useCallback(
+    (id) => {
+      setJobs((prev) => prev.filter((j) => j.id !== id));
+    },
+    [setJobs]
+  );
 
   const value = useMemo(
     () => ({ jobs, addJob, updateJob, deleteJob }),
-    [jobs]
+    [jobs, addJob, updateJob, deleteJob]
   );
 
   return <JobsContext.Provider value={value}>{children}</JobsContext.Provider>;
